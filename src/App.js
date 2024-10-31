@@ -11,7 +11,9 @@ import { useAuth } from "./context/AuthContext";
 import HomePage from "./components/HomePage";
 import ProductDetails from "./pages/ProductDetailsPage";
 import ChatPage from "./pages/ChatPage";
+import ManageListings from "./pages/ManageListings";
 import SupplierChatPage from "./pages/SupplierChatPage";
+import AddProduct from "./pages/AddProduct";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { currentUser, role, loading, setIntendedRoute } = useAuth();
@@ -55,6 +57,22 @@ function App() {
         element={
           <ProtectedRoute requiredRole='supplier'>
             <SupplierHome />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/manage-listings'
+        element={
+          <ProtectedRoute requiredRole='supplier'>
+            <ManageListings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/add-product'
+        element={
+          <ProtectedRoute requiredRole='supplier'>
+            <AddProduct />
           </ProtectedRoute>
         }
       />

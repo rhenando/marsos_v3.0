@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { Form, Button, Container, InputGroup } from "react-bootstrap";
+import { db } from "../firebase.config";
+import { doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const SupplierRegistration = () => {
   const [countryCode, setCountryCode] = useState("+966");
@@ -15,23 +19,65 @@ const SupplierRegistration = () => {
   const [otherCitiesServed, setOtherCitiesServed] = useState("");
   const [deliveryOption, setDeliveryOption] = useState("own");
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("User is not authenticated. Please log in.");
+      navigate("/login");
+      return;
+    }
+
+    const uid = user.uid;
     const fullPhoneNumber = `${countryCode}${phone}`;
-    console.log({
-      fullPhoneNumber,
-      name,
-      email,
-      companyName,
-      crNumber,
-      crLicense,
-      location,
-      city,
-      region,
-      otherCitiesServed,
-      deliveryOption,
-    });
-    // Perform registration logic here
+
+    try {
+      // Save supplier data in the 'users' collection with role specified as "supplier"
+      await setDoc(
+        doc(db, "users", uid),
+        {
+          role: "supplier", // Set role as "supplier"
+          name,
+          email,
+          phone: fullPhoneNumber,
+          companyName,
+          crNumber,
+          crLicense,
+          location,
+          city,
+          region,
+          otherCitiesServed,
+          deliveryOption,
+          uid,
+        },
+        { merge: true }
+      );
+
+      alert("Supplier registered successfully!");
+      navigate("/supplier-home"); // Redirect to supplier home page
+
+      // Clear form fields
+      setCountryCode("+966");
+      setPhone("");
+      setName("");
+      setEmail("");
+      setCompanyName("");
+      setCrNumber("");
+      setCrLicense(null);
+      setLocation("");
+      setCity("");
+      setRegion("");
+      setOtherCitiesServed("");
+      setDeliveryOption("own");
+    } catch (error) {
+      console.error("Error registering supplier:", error);
+      alert("Failed to register supplier. Please try again.");
+    }
   };
 
   return (
@@ -40,7 +86,6 @@ const SupplierRegistration = () => {
       className='d-flex flex-column align-items-center justify-content-center'
       style={{ minHeight: "100vh", backgroundColor: "#f7f7f7" }}
     >
-      {/* Centered Logo and Title */}
       <div className='text-center mb-4 d-flex flex-column align-items-center'>
         <img
           src='/path/to/logo.png'
@@ -52,7 +97,6 @@ const SupplierRegistration = () => {
         </h2>
       </div>
 
-      {/* Form */}
       <Form
         onSubmit={handleSubmit}
         className='p-4 border rounded shadow-sm bg-white'
@@ -63,6 +107,7 @@ const SupplierRegistration = () => {
           margin: "0 auto",
         }}
       >
+        {/* Phone Number */}
         <Form.Group controlId='formPhoneNumber' className='mb-3'>
           <InputGroup>
             <Form.Select
