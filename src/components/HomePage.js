@@ -9,24 +9,18 @@ import {
   Col,
   Card,
 } from "react-bootstrap";
-import { User } from "react-feather"; // Import Feather Icons' User icon
+import { User } from "react-feather"; // Ensure react-feather is installed
 
 const HomePage = () => {
   return (
     <div>
       {/* Header */}
-      <Navbar style={{ backgroundColor: "#2c6449" }} variant='dark' expand='lg'>
+      <Navbar style={{ backgroundColor: "gray" }} variant='dark' expand='lg'>
         <Container>
-          <Navbar.Brand href='#home'>
-            <img
-              src='/path/to/logo.png' // Update with your logo path
-              alt='YourBrand Logo'
-              style={{ width: "50px" }}
-            />
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
-            <Nav className='ms-auto'>
+            <Nav className='me-auto'>
+              {" "}
+              {/* Aligns menu items to the left */}
               <Nav.Link href='#home'>Home</Nav.Link>
               <Nav.Link href='#features'>Features</Nav.Link>
               <Nav.Link href='#catalog'>Catalog</Nav.Link>
@@ -37,6 +31,15 @@ const HomePage = () => {
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
+          <Navbar.Brand className='ms-auto' href='#home'>
+            {" "}
+            {/* Aligns logo to the right */}
+            <img
+              src='./logo-marsos.svg' // Update with the actual path to your logo
+              alt='Logo'
+              style={{ width: "100px" }}
+            />
+          </Navbar.Brand>
         </Container>
       </Navbar>
 
