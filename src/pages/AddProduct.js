@@ -4,11 +4,11 @@ import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { db, storage } from "../firebase.config";
 import { collection, addDoc, doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useAuth } from "../context/AuthContext"; // Import useAuth to access currentUser and token
+import { useAuth } from "../context/AuthContext";
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const [username, setUsername] = useState("User");
 
   useEffect(() => {
@@ -35,6 +35,7 @@ const AddProduct = () => {
 
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
@@ -63,6 +64,38 @@ const AddProduct = () => {
   const [mainImage, setMainImage] = useState(null);
   const [thumbnailImage, setThumbnailImage] = useState(null);
 
+  const customCategories = [
+    "Construction",
+    "Plastic & Papers",
+    "Equipment",
+    "Saudi Manufactured Products",
+  ];
+  const subcategoryOptions = {
+    Construction: ["Sand", "Cement", "Wood", "Bricks"],
+    "Plastic & Papers": [
+      "Paper Cups",
+      "Plastic Packaging",
+      "Plastic Cups",
+      "White Papers",
+    ],
+    Equipment: [
+      "Drilling Equipment",
+      "Transportation Equipment",
+      "Coating Equipment",
+      "Construction Equipment",
+    ],
+    "Saudi Manufactured Products": [
+      "Subcategory 1",
+      "Subcategory 2",
+      "Subcategory 3",
+      "Subcategory 4",
+    ],
+  };
+
+  useEffect(() => {
+    setSubcategory("");
+  }, [category]);
+
   const handleAddField = (setter, variations) =>
     setter([...variations, { color: "", price: "" }]);
   const handleFieldChange = (setter, index, field, value) =>
@@ -81,20 +114,18 @@ const AddProduct = () => {
       )
     );
 
+  const handleDimensionChange = (dimension, field, value) =>
+    setDimensions((prevDimensions) => ({
+      ...prevDimensions,
+      [dimension]: { ...prevDimensions[dimension], [field]: value },
+    }));
+
   const handleSpecialInputChange = (index, field, value) =>
     setSpecialInputs((prevSpecialInputs) =>
       prevSpecialInputs.map((input, i) =>
         i === index ? { ...input, [field]: value } : input
       )
     );
-
-  const generateProductId = (name) =>
-    `${name}${Math.floor(10 + Math.random() * 90)}`;
-  const handleDimensionChange = (dimension, field, value) =>
-    setDimensions((prevDimensions) => ({
-      ...prevDimensions,
-      [dimension]: { ...prevDimensions[dimension], [field]: value },
-    }));
 
   const uploadImage = async (file) => {
     const imageRef = ref(storage, `images/${file.name}`);
@@ -104,21 +135,18 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      console.log("ID Token:", token); // Log token if needed
-
       const mainImageUrl = mainImage ? await uploadImage(mainImage) : null;
       const thumbnailImageUrl = thumbnailImage
         ? await uploadImage(thumbnailImage)
         : null;
-      const productId = generateProductId(productName);
+      const productId = `${productName}${Math.floor(10 + Math.random() * 90)}`;
 
-      // Automatically set supplierName to the username
       const productData = {
         productId,
         productName,
         category,
+        subcategory,
         location,
         description,
         stockQuantity,
@@ -130,15 +158,17 @@ const AddProduct = () => {
         dimensions,
         specialInputs,
         images: { mainImage: mainImageUrl, thumbnailImage: thumbnailImageUrl },
-        supplierName: username, // Automatically set supplierName
+        supplierName: username,
+        categories: [...customCategories],
       };
 
       await addDoc(collection(db, "products"), productData);
       alert("Product added successfully!");
 
-      // Reset form fields after submission
+      // Reset form fields
       setProductName("");
       setCategory("");
+      setSubcategory("");
       setLocation("");
       setDescription("");
       setStockQuantity("");
@@ -181,18 +211,48 @@ const AddProduct = () => {
               />
             </Form.Group>
           </Col>
+
           <Col md={3}>
-            <Form.Group controlId='category'>
-              <Form.Label>Category</Form.Label>
+            <Form.Group controlId='mainCategory'>
+              <Form.Label>Main Category</Form.Label>
               <Form.Control
-                type='text'
-                placeholder='Category'
+                as='select'
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-              />
+              >
+                <option value=''>Select Main Category</option>
+                {customCategories.map((cat, index) => (
+                  <option key={index} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </Form.Control>
             </Form.Group>
           </Col>
-          <Col md={3}>
+
+          {category && subcategoryOptions[category] && (
+            <Col md={3}>
+              <Form.Group controlId='subcategory'>
+                <Form.Label>Subcategory</Form.Label>
+                <Form.Control
+                  as='select'
+                  value={subcategory}
+                  onChange={(e) => setSubcategory(e.target.value)}
+                >
+                  <option value=''>Select Subcategory</option>
+                  {subcategoryOptions[category].map((sub, index) => (
+                    <option key={index} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          )}
+        </Row>
+
+        <Row className='mt-3'>
+          <Col md={6}>
             <Form.Group controlId='location'>
               <Form.Label>Location</Form.Label>
               <Form.Control
@@ -203,9 +263,6 @@ const AddProduct = () => {
               />
             </Form.Group>
           </Col>
-        </Row>
-
-        <Row className='mt-3'>
           <Col md={6}>
             <Form.Group controlId='description'>
               <Form.Label>Product Description</Form.Label>
@@ -216,34 +273,6 @@ const AddProduct = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group controlId='stock'>
-              <Form.Label>Stock Quantity</Form.Label>
-              <Form.Control
-                type='number'
-                placeholder='Stock Quantity'
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group controlId='deliveryTime'>
-              <Form.Label>Delivery Time</Form.Label>
-              <Form.Control
-                as='select'
-                value={deliveryTime}
-                onChange={(e) => setDeliveryTime(e.target.value)}
-              >
-                <option value=''>Choose Delivery Time</option>
-                <option value='1 Day'>1 Day</option>
-                <option value='3 Days'>3 Days</option>
-                <option value='7 Days'>7 Days</option>
-                <option value='14 Days'>14 Days</option>
-                <option value='30 Days'>30 Days</option>
-              </Form.Control>
             </Form.Group>
           </Col>
         </Row>

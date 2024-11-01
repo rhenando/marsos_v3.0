@@ -1,26 +1,50 @@
-// src/pages/ProductDetails.js
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Container, Card, Row, Col, Badge } from "react-bootstrap";
 import { db } from "../firebase.config";
 import { doc, getDoc } from "firebase/firestore";
-import { useAuth } from "../context/AuthContext"; // Ensure you have an AuthContext for auth state
+import { useAuth } from "../context/AuthContext";
 
 const ProductDetails = () => {
-  const { productId } = useParams(); // Get productId from URL params
+  const { productId } = useParams();
   const navigate = useNavigate();
-  const { currentUser, setIntendedRoute } = useAuth(); // Check if user is authenticated and set intended route
+  const { currentUser, setIntendedRoute, token } = useAuth();
   const [productData, setProductData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch product details based on productId
+    const handleSecureFetch = async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(
+          "https://your-backend-api.com/secure-data",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        console.log("Secure data:", data);
+      } catch (error) {
+        console.error("Error fetching secure data:", error);
+      }
+    };
+    if (token) {
+      handleSecureFetch();
+    }
+  }, [token]);
+
+  useEffect(() => {
     const fetchProductData = async () => {
       try {
         const docRef = doc(db, "products", productId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProductData(docSnap.data());
+          const data = docSnap.data();
+          console.log("Fetched product data:", data);
+          setProductData(data);
         } else {
           console.log("Product not found");
         }
@@ -37,8 +61,8 @@ const ProductDetails = () => {
     if (currentUser) {
       navigate(`/chat/${productId}`, { state: { productData } });
     } else {
-      setIntendedRoute(`/chat/${productId}`); // Set intended route to chat page
-      navigate("/login"); // Redirect to login if user is not authenticated
+      setIntendedRoute(`/chat/${productId}`);
+      navigate("/login");
     }
   };
 
@@ -55,8 +79,8 @@ const ProductDetails = () => {
             <Card>
               <Card.Img
                 variant='top'
-                src={productData.imageUrl}
-                alt={productData.name}
+                src={productData.mainImage || ""}
+                alt={productData.productName || "Unnamed Product"}
               />
             </Card>
           </Col>
@@ -72,18 +96,74 @@ const ProductDetails = () => {
                     fontSize: "2rem",
                   }}
                 >
-                  {productData.name}
+                  {productData.productName || "Unnamed Product"}
                 </Card.Title>
                 <Card.Text className='text-muted mb-2'>
-                  <Badge bg='secondary'>{productData.category}</Badge>
+                  <Badge bg='secondary'>
+                    {productData.category || "Uncategorized"}
+                  </Badge>
                 </Card.Text>
 
                 <Card.Text style={{ fontSize: "1.2rem" }}>
-                  <strong>Description:</strong> {productData.description}
+                  <strong>Description:</strong>{" "}
+                  {productData.description || "No description available"}
                 </Card.Text>
 
-                <Card.Text style={{ fontSize: "1.2rem" }}>
-                  <strong>Price:</strong> ${productData.price.toFixed(2)}
+                {/* Price Range Table */}
+                <Card.Text style={{ fontSize: "1.2rem", marginTop: "15px" }}>
+                  <strong>Price Range:</strong>
+                  <table
+                    style={{
+                      width: "100%",
+                      marginTop: "10px",
+                      borderCollapse: "collapse",
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left", padding: "5px" }}>
+                          Quantity
+                        </th>
+                        <th style={{ textAlign: "left", padding: "5px" }}>
+                          Price per Unit
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productData.priceRanges &&
+                      productData.priceRanges.length > 0 ? (
+                        productData.priceRanges.map((range, index) => (
+                          <tr
+                            key={index}
+                            style={{ borderBottom: "1px solid #ddd" }}
+                          >
+                            <td style={{ padding: "5px" }}>
+                              {range.minQty} -{" "}
+                              {range.maxQty === Infinity
+                                ? "and above"
+                                : range.maxQty}{" "}
+                              pieces
+                            </td>
+                            <td style={{ padding: "5px" }}>
+                              $
+                              {!isNaN(parseFloat(range.price))
+                                ? parseFloat(range.price).toFixed(2)
+                                : "N/A"}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan='2'
+                            style={{ padding: "5px", textAlign: "center" }}
+                          >
+                            N/A
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </Card.Text>
 
                 <Card.Text style={{ fontSize: "1.2rem" }}>
@@ -94,10 +174,10 @@ const ProductDetails = () => {
                 </Card.Text>
 
                 <Card.Text style={{ fontSize: "1.2rem" }}>
-                  <strong>Supplier:</strong> {productData.supplierName}
+                  <strong>Supplier:</strong>{" "}
+                  {productData.supplierName || "Unknown Supplier"}
                 </Card.Text>
 
-                {/* Contact Supplier Button */}
                 <Button
                   variant='success'
                   onClick={handleContactSupplier}
