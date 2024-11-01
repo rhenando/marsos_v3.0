@@ -4,6 +4,7 @@ import NavbarComponent from "../components/sections/NavbarComponent";
 import HeroSection from "../components/sections/HeroSection";
 import FeaturesSection from "../components/sections/FeaturesSection";
 import CatalogSection from "../components/sections/CatalogSection";
+import Footer from "./Footer";
 
 const HomePage = () => {
   return (
@@ -12,6 +13,7 @@ const HomePage = () => {
       <HeroSection />
       <FeaturesSection />
       <CatalogSection />
+      <Footer />
     </div>
   );
 };
