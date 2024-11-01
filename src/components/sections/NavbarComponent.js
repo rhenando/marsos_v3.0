@@ -37,8 +37,11 @@ const NavbarComponent = () => {
     backgroundColor: "white",
     padding: "10px 0",
     opacity: showNavbar ? 1 : 0,
-    transform: showNavbar ? "translateY(0)" : "translateY(-20px)",
-    transition: "opacity 0.5s ease, transform 0.5s ease",
+    transform: showNavbar
+      ? "translateY(0) scale(1)"
+      : "translateY(-20px) scale(0.95)",
+    transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+    boxShadow: showNavbar ? "0px 4px 12px rgba(0, 0, 0, 0.1)" : "none", // Adds a shadow effect when visible
   };
 
   return (
@@ -182,7 +185,6 @@ const NavbarComponent = () => {
               </Button>
             )}
 
-            {/* Adjusted Search Bar in Main Navigation */}
             <Form
               className='mx-3'
               style={{ display: "flex", alignItems: "center" }}
@@ -192,15 +194,14 @@ const NavbarComponent = () => {
                 placeholder='Search'
                 aria-label='Search'
                 style={{
-                  height: "35px", // Set a fixed height
-                  padding: "5px 10px", // Adjust padding
+                  height: "35px",
+                  padding: "5px 10px",
                   borderRadius: "20px",
                   boxSizing: "border-box",
                 }}
               />
             </Form>
 
-            {/* Grouped Links */}
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
               <Nav.Link href='#' style={{ color: "#2c6449" }}>
                 Help Center
