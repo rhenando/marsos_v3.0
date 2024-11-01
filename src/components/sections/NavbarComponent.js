@@ -11,7 +11,7 @@ import { ShoppingCart, User } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
 
 const NavbarComponent = () => {
-  const { currentUser, role } = useAuth(); // Access currentUser and role from context
+  const { currentUser, role } = useAuth();
   const dashboardLink =
     role === "buyer"
       ? "/buyer-home"
@@ -19,28 +19,33 @@ const NavbarComponent = () => {
       ? "/supplier-home"
       : "/";
 
-  // State to show or hide the navbar on scroll
   const [showNavbar, setShowNavbar] = useState(false);
 
-  // Toggle navbar visibility on scroll
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowNavbar(true);
-      } else {
-        setShowNavbar(false);
-      }
+      setShowNavbar(window.scrollY > 100);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const navbarStyles = {
+    position: "fixed",
+    top: 0,
+    width: "100%",
+    zIndex: 1000,
+    backgroundColor: "white",
+    padding: "10px 0",
+    opacity: showNavbar ? 1 : 0,
+    transform: showNavbar ? "translateY(0)" : "translateY(-20px)",
+    transition: "opacity 0.5s ease, transform 0.5s ease",
+  };
 
   return (
     <>
       {/* Top Bar */}
       <div style={{ backgroundColor: "#f8f9fa", padding: "5px 0" }}>
         <Container className='d-flex justify-content-between align-items-center'>
-          {/* Left Side */}
           <div className='d-flex align-items-center'>
             <NavDropdown
               title='Language'
@@ -68,8 +73,6 @@ const NavbarComponent = () => {
               </>
             )}
           </div>
-
-          {/* Right Side */}
           <div className='d-flex align-items-center'>
             <Nav.Link href='#' style={{ color: "#2c6449" }}>
               Al Jubail
@@ -78,9 +81,8 @@ const NavbarComponent = () => {
         </Container>
       </div>
 
-      {/* Middle Section with Grouped Icons, Centered Links, and Logo */}
+      {/* Middle Section */}
       <Container className='py-3 d-flex justify-content-between align-items-center'>
-        {/* Grouped User Icon, Shopping Cart, and Search Bar */}
         <div className='d-flex align-items-center'>
           {currentUser ? (
             <NavDropdown
@@ -131,7 +133,6 @@ const NavbarComponent = () => {
           </Form>
         </div>
 
-        {/* Centered Navigation Links */}
         <Nav className='mx-3' style={{ justifyContent: "center", flexGrow: 1 }}>
           <Nav.Link href='#home' style={{ color: "#2c6449" }}>
             Home
@@ -147,66 +148,60 @@ const NavbarComponent = () => {
           </Nav.Link>
         </Nav>
 
-        {/* Logo on the Right */}
         <a href='#home' className='ms-2'>
-          <img src='./logo-marsos.svg' alt='Logo' style={{ width: "100px" }} />
+          <img src='./logo-marsos.svg' alt='Logo' style={{ width: "120px" }} />
         </a>
       </Container>
 
-      {/* Main Navigation Bar - Visible on scroll with white background */}
-      {showNavbar && (
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "10px 0",
-            position: "fixed",
-            top: 0,
-            width: "100%",
-            zIndex: 1000,
-          }}
-        >
-          <Container>
-            <Nav className='justify-content-center'>
-              {currentUser ? (
-                <NavDropdown
-                  title={<User size={18} style={{ color: "#2c6449" }} />}
-                  id='user-dropdown-main'
-                >
-                  <NavDropdown.Item
-                    href={dashboardLink}
-                    style={{ color: "#2c6449" }}
-                  >
-                    My Account
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    href='#settings'
-                    style={{ color: "#2c6449" }}
-                  >
-                    Settings
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item href='#logout' style={{ color: "#2c6449" }}>
-                    Logout
-                  </NavDropdown.Item>
-                </NavDropdown>
-              ) : (
-                <Button
-                  variant='link'
-                  href='/login'
+      {/* Main Navigation Bar */}
+      <div style={navbarStyles}>
+        <Container>
+          <Nav className='justify-content-center align-items-center'>
+            {currentUser ? (
+              <NavDropdown
+                title={<User size={18} style={{ color: "#2c6449" }} />}
+                id='user-dropdown-main'
+              >
+                <NavDropdown.Item
+                  href={dashboardLink}
                   style={{ color: "#2c6449" }}
                 >
-                  <User size={18} />
-                </Button>
-              )}
-              <Form className='d-flex mx-3' style={{ width: "200px" }}>
-                <FormControl
-                  type='search'
-                  placeholder='Search'
-                  className='me-2'
-                  aria-label='Search'
-                  style={{ borderRadius: "20px", padding: "10px" }}
-                />
-              </Form>
+                  My Account
+                </NavDropdown.Item>
+                <NavDropdown.Item href='#settings' style={{ color: "#2c6449" }}>
+                  Settings
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item href='#logout' style={{ color: "#2c6449" }}>
+                  Logout
+                </NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <Button variant='link' href='/login' style={{ color: "#2c6449" }}>
+                <User size={18} />
+              </Button>
+            )}
+
+            {/* Adjusted Search Bar in Main Navigation */}
+            <Form
+              className='mx-3'
+              style={{ display: "flex", alignItems: "center" }}
+            >
+              <FormControl
+                type='search'
+                placeholder='Search'
+                aria-label='Search'
+                style={{
+                  height: "35px", // Set a fixed height
+                  padding: "5px 10px", // Adjust padding
+                  borderRadius: "20px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </Form>
+
+            {/* Grouped Links */}
+            <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
               <Nav.Link href='#' style={{ color: "#2c6449" }}>
                 Help Center
               </Nav.Link>
@@ -215,14 +210,23 @@ const NavbarComponent = () => {
               </Nav.Link>
               <Nav.Link
                 href='/supplier-registration'
-                style={{ color: "#2c6449" }}
+                style={{
+                  color: "#2c6449",
+                  display: "flex",
+                  alignItems: "center",
+                }}
               >
                 Become Vendor
+                <img
+                  src='./logo-marsos.svg'
+                  alt='Brand Logo'
+                  style={{ width: "45px", marginLeft: "10px" }}
+                />
               </Nav.Link>
-            </Nav>
-          </Container>
-        </div>
-      )}
+            </div>
+          </Nav>
+        </Container>
+      </div>
     </>
   );
 };
