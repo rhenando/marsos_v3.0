@@ -17,7 +17,7 @@ const FeaturesSection = () => {
     {
       id: "3",
       category: "Plastic & Papers",
-      images: { mainImage: "https://via.placeholder.com/150" },
+      images: { mainImage: "plasticandpapers.webp" },
     },
   ];
 
