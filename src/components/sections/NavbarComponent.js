@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Nav,
   Container,
@@ -12,13 +12,28 @@ import { useAuth } from "../../context/AuthContext";
 
 const NavbarComponent = () => {
   const { currentUser, role } = useAuth(); // Access currentUser and role from context
-
   const dashboardLink =
     role === "buyer"
       ? "/buyer-home"
       : role === "supplier"
       ? "/supplier-home"
       : "/";
+
+  // State to show or hide the navbar on scroll
+  const [showNavbar, setShowNavbar] = useState(false);
+
+  // Toggle navbar visibility on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowNavbar(true);
+      } else {
+        setShowNavbar(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -67,7 +82,6 @@ const NavbarComponent = () => {
       <Container className='py-3 d-flex justify-content-between align-items-center'>
         {/* Grouped User Icon, Shopping Cart, and Search Bar */}
         <div className='d-flex align-items-center'>
-          {/* User Icon with Dropdown */}
           {currentUser ? (
             <NavDropdown
               title={
@@ -99,8 +113,6 @@ const NavbarComponent = () => {
               <User size={18} />
             </Button>
           )}
-
-          {/* Shopping Cart Icon */}
           <Button
             variant='link'
             href='#'
@@ -108,8 +120,6 @@ const NavbarComponent = () => {
           >
             <ShoppingCart size={18} />
           </Button>
-
-          {/* Search Bar */}
           <Form className='d-flex mx-2' style={{ width: "200px" }}>
             <FormControl
               type='search'
@@ -143,73 +153,76 @@ const NavbarComponent = () => {
         </a>
       </Container>
 
-      {/* Main Navigation Bar */}
-      <div style={{ backgroundColor: "#2c6449", padding: "10px 0" }}>
-        <Container>
-          <Nav className='justify-content-center'>
-            {/* User Icon */}
-            {currentUser ? (
-              <NavDropdown
-                title={<User size={18} style={{ color: "#ffffff" }} />}
-                id='user-dropdown-main'
-              >
-                <NavDropdown.Item
-                  href={dashboardLink}
+      {/* Main Navigation Bar - Visible on scroll with white background */}
+      {showNavbar && (
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "10px 0",
+            position: "fixed",
+            top: 0,
+            width: "100%",
+            zIndex: 1000,
+          }}
+        >
+          <Container>
+            <Nav className='justify-content-center'>
+              {currentUser ? (
+                <NavDropdown
+                  title={<User size={18} style={{ color: "#2c6449" }} />}
+                  id='user-dropdown-main'
+                >
+                  <NavDropdown.Item
+                    href={dashboardLink}
+                    style={{ color: "#2c6449" }}
+                  >
+                    My Account
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    href='#settings'
+                    style={{ color: "#2c6449" }}
+                  >
+                    Settings
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href='#logout' style={{ color: "#2c6449" }}>
+                    Logout
+                  </NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <Button
+                  variant='link'
+                  href='/login'
                   style={{ color: "#2c6449" }}
                 >
-                  My Account
-                </NavDropdown.Item>
-                <NavDropdown.Item href='#settings' style={{ color: "#2c6449" }}>
-                  Settings
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href='#logout' style={{ color: "#2c6449" }}>
-                  Logout
-                </NavDropdown.Item>
-              </NavDropdown>
-            ) : (
-              <Button variant='link' href='/login' style={{ color: "#ffffff" }}>
-                <User size={18} />
-              </Button>
-            )}
-            {/* Search Bar */}
-            <Form className='d-flex mx-3' style={{ width: "200px" }}>
-              <FormControl
-                type='search'
-                placeholder='Search'
-                className='me-2'
-                aria-label='Search'
-                style={{ borderRadius: "20px", padding: "10px" }}
-              />
-            </Form>
-            <Nav.Link
-              href='#'
-              style={{ color: "white" }}
-              target='_blank'
-              onClick={(e) => {
-                e.preventDefault();
-                window.open("https://example.com", "_blank");
-              }}
-            >
-              Help Center
-            </Nav.Link>
-            <Nav.Link
-              href='#'
-              style={{ color: "white" }}
-              target='_blank'
-              onClick={(e) => {
-                e.preventDefault();
-                window.open("https://example.com", "_blank");
-              }}
-            >
-              Get the App
-            </Nav.Link>
-            <Nav.Link href='/supplier-registration' style={{ color: "white" }}>
-              Become Vendor
-            </Nav.Link>
-          </Nav>
-        </Container>
-      </div>
+                  <User size={18} />
+                </Button>
+              )}
+              <Form className='d-flex mx-3' style={{ width: "200px" }}>
+                <FormControl
+                  type='search'
+                  placeholder='Search'
+                  className='me-2'
+                  aria-label='Search'
+                  style={{ borderRadius: "20px", padding: "10px" }}
+                />
+              </Form>
+              <Nav.Link href='#' style={{ color: "#2c6449" }}>
+                Help Center
+              </Nav.Link>
+              <Nav.Link href='#' style={{ color: "#2c6449" }}>
+                Get the App
+              </Nav.Link>
+              <Nav.Link
+                href='/supplier-registration'
+                style={{ color: "#2c6449" }}
+              >
+                Become Vendor
+              </Nav.Link>
+            </Nav>
+          </Container>
+        </div>
+      )}
     </>
   );
 };
