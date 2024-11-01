@@ -12,7 +12,7 @@ const FeaturesSection = () => {
     {
       id: "2",
       category: "Equipment",
-      images: { mainImage: "https://via.placeholder.com/150" },
+      images: { mainImage: "/equipment.webp" },
     },
     {
       id: "3",
