@@ -1,36 +1,56 @@
-// src/components/HeroSection.js
 import React from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 
 const HeroSection = () => {
   return (
     <section
-      className='bg-light py-5 text-center'
-      style={{ marginTop: "120px" }} // Adjust based on the height of your navbars
+      style={{
+        backgroundImage: `url('/path/to/your/background-image.jpg')`, // Replace with the actual path to the image
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        color: "white",
+        padding: "100px 0",
+        position: "relative",
+      }}
     >
-      <Container>
+      {/* Overlay to apply a green tint */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 64, 0, 0.7)", // Dark green overlay with transparency
+          zIndex: 1,
+        }}
+      ></div>
+
+      <Container style={{ position: "relative", zIndex: 2 }}>
         <Row className='align-items-center'>
-          <Col md={6}>
-            <h1>Welcome to YourBrand</h1>
-            <p className='lead'>
-              Discover our unique collection of products tailored to meet your
-              needs.
-            </p>
-            <Button
-              variant='primary'
-              size='lg'
-              href='#catalog'
-              style={{ backgroundColor: "#2c6449", borderColor: "#2c6449" }}
+          <Col md={6} className='ms-auto text-end'>
+            <h1 style={{ fontSize: "3rem", fontWeight: "bold" }}>
+              Comfortable and Fast
+            </h1>
+            <h2
+              style={{
+                fontSize: "2.5rem",
+                fontWeight: "bold",
+                marginTop: "1rem",
+              }}
             >
-              Explore Catalog
-            </Button>
-          </Col>
-          <Col md={6}>
-            <img
-              src='https://via.placeholder.com/500x300'
-              alt='Main feature of YourBrand'
-              className='img-fluid'
-            />
+              At Your Place
+            </h2>
+            <p style={{ fontSize: "1.2rem", marginTop: "1.5rem" }}>
+              Because we care about you, we understand your needs and
+              preferences. We bring you a platform that gathers all national
+              products produced in the Kingdom of Saudi Arabia in one place.
+            </p>
+            <p style={{ fontSize: "1.2rem" }}>
+              From family-owned factories to large-scale operations, all in one
+              platform, with easy technology and convenient payment methods to
+              support the Saudi economy and promote local industries.
+            </p>
           </Col>
         </Row>
       </Container>
